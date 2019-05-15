@@ -1,4 +1,5 @@
 import R from 'ramda'
+import { useEffect } from 'react'
 
 import {
   asyncRes,
@@ -13,9 +14,10 @@ import {
   meteorState,
   updateEditing,
   errRescue,
-} from 'utils'
+  nilOrEmpty,
+} from '@utils'
 
-import SR71 from 'utils/async/sr71'
+import SR71 from '@utils/async/sr71'
 import { S, updateFields } from './schema'
 
 const sr71$ = new SR71()
@@ -29,16 +31,27 @@ let sub$ = null
 export const goBack = () =>
   dispatchEvent(EVENT.PREVIEW_OPEN, { type: TYPE.PREVIEW_ACCOUNT_VIEW })
 
-export const inputOnChange = (part, e) => updateEditing(store, part, e)
+export const inputOnChange = R.curry((part, e) => updateEditing(store, part, e))
+/* eslint-disable no-unused-vars */
+export const sexChange = R.curry((sex, e) => store.updateEditing({ sex }))
 
-export const updateBg = (key, part, { target: { value } }) =>
-  store.markState({
-    [key]: R.merge(store[key], { [part]: value }),
-  })
+/* eslint-disable no-unused-vars */
+export const socialOnChange = R.curry((part, e) => {
+  const { editUserData: editUser } = store
+  editUser.social[part] = e.target.value
 
-export const addBg = type => store.addBg(type)
+  store.markState({ editUser })
+})
 
-export const removeWorkBg = (company, title) => {
+export const updateBackground = R.curry((key, part, { target: { value } }) =>
+  store.markState({ [key]: R.merge(store[key], { [part]: value }) })
+)
+
+/* eslint-disable no-unused-vars */
+export const addBackground = R.curry((type, e) => store.addBackground(type))
+
+/* eslint-disable no-unused-vars */
+export const removeWorkBackground = R.curry((company, title, e) => {
   const { editUserData } = store
   const { workBackgrounds } = editUserData
   const newWorkBackgrounds = R.reject(
@@ -46,9 +59,10 @@ export const removeWorkBg = (company, title) => {
     workBackgrounds
   )
   store.updateEditing({ workBackgrounds: newWorkBackgrounds })
-}
+})
 
-export const removeEduBg = (school, major) => {
+/* eslint-disable no-unused-vars */
+export const removeEduBackground = R.curry((school, major, e) => {
   const { editUserData } = store
   const { educationBackgrounds } = editUserData
   const newEducationBackgrounds = R.reject(
@@ -56,9 +70,7 @@ export const removeEduBg = (school, major) => {
     educationBackgrounds
   )
   store.updateEditing({ educationBackgrounds: newEducationBackgrounds })
-}
-
-export const sexChange = sex => store.updateEditing({ sex })
+})
 
 export const updateConfirm = () => {
   if (!store.statusClean) return false
@@ -66,17 +78,22 @@ export const updateConfirm = () => {
 
   const educationBackgrounds = R.clone(profile.educationBackgrounds)
   const workBackgrounds = R.clone(profile.workBackgrounds)
+  const social = R.reject(nilOrEmpty, R.clone(profile.social))
 
-  profile = R.omit(['educationBackgrounds', 'workBackgrounds'], profile)
+  profile = R.omit(
+    ['educationBackgrounds', 'workBackgrounds', 'social'],
+    profile
+  )
 
   const args = { profile }
 
   if (!R.isEmpty(educationBackgrounds))
     args.educationBackgrounds = educationBackgrounds
   if (!R.isEmpty(workBackgrounds)) args.workBackgrounds = workBackgrounds
+  if (!R.isEmpty(social)) args.social = social
 
   store.markState({ updating: true })
-  debug('profile: ', args)
+  debug('args: ', args)
   sr71$.mutate(S.updateProfile, args)
 }
 
@@ -128,18 +145,22 @@ const ErrSolver = [
   },
 ]
 
-export const init = _store => {
-  store = _store
+// ###############################
+// init & uninit
+// ###############################
+export const useInit = _store =>
+  useEffect(
+    () => {
+      store = _store
+      // debug('effect init')
+      sub$ = sr71$.data().subscribe($solver(DataSolver, ErrSolver))
+      store.copyAccountInfo()
 
-  if (sub$) return false
-  sub$ = sr71$.data().subscribe($solver(DataSolver, ErrSolver))
-  store.copyAccountInfo()
-}
-
-export const uninit = () => {
-  if (!sub$) return false
-  debug('===== do uninit')
-  sr71$.stop()
-  sub$.unsubscribe()
-  sub$ = null
-}
+      return () => {
+        // debug('effect uninit')
+        sr71$.stop()
+        sub$.unsubscribe()
+      }
+    },
+    [_store]
+  )

@@ -1,7 +1,8 @@
 // import R from 'ramda'
+import { useEffect } from 'react'
 
-import { makeDebugger, $solver, asyncErr, ERR, errRescue } from 'utils'
-import SR71 from 'utils/async/sr71'
+import { makeDebugger, $solver, asyncErr, ERR, errRescue } from '@utils'
+import SR71 from '@utils/async/sr71'
 
 // import S from './schema'
 
@@ -34,17 +35,20 @@ const ErrSolver = [
   },
 ]
 
-export const init = _store => {
-  store = _store
+// ###############################
+// init & uninit
+// ###############################
+export const useInit = _store =>
+  useEffect(
+    () => {
+      store = _store
+      debug('init store: ', store)
+      sub$ = sr71$.data().subscribe($solver(DataSolver, ErrSolver))
 
-  debug('init store: ', store)
-  if (sub$) return false
-  sub$ = sr71$.data().subscribe($solver(DataSolver, ErrSolver))
-}
-
-export const uninit = () => {
-  debug('===== do uninit')
-  sr71$.stop()
-  sub$.unsubscribe()
-  sub$ = null
-}
+      return () => {
+        sr71$.stop()
+        sub$.unsubscribe()
+      }
+    },
+    [_store]
+  )

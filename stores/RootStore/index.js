@@ -14,13 +14,13 @@ import {
   themeSkins,
   dispatchEvent,
   EVENT,
-} from 'utils'
+} from '@utils'
 
 import {
   // domain
   RouteStore,
   AccountStore,
-  BodylayoutStore,
+  GlobalLayoutStore,
   HeaderStore,
   ContentStore,
   ViewingStore,
@@ -84,6 +84,7 @@ import {
   GirlVerifierStore,
   CashierStore,
   ArticleAuthorCardStore,
+  CommunitySetterStore,
   // user page
   UserPublishedStore,
   UserPublishedCommentsStore,
@@ -127,7 +128,7 @@ const rootStore = t
 
     // layouts > xxx > papers
     // layouts
-    bodylayout: t.optional(BodylayoutStore, {}),
+    globalLayout: t.optional(GlobalLayoutStore, {}),
     header: t.optional(HeaderStore, {}),
     content: t.optional(ContentStore, {}),
     // layouts end
@@ -170,6 +171,7 @@ const rootStore = t
     girlVerifier: t.optional(GirlVerifierStore, {}),
     cashier: t.optional(CashierStore, {}),
     articleAuthorCard: t.optional(ArticleAuthorCardStore, {}),
+    communitySetter: t.optional(CommunitySetterStore, {}),
 
     articleViewerHeader: t.optional(ArticleViewerHeader, {}),
     articleBodyHeader: t.optional(ArticleBodyHeaderStore, {}),

@@ -6,48 +6,40 @@
 
 import React from 'react'
 import PropTypes from 'prop-types'
-import { inject, observer } from 'mobx-react'
 
-import { makeDebugger, storePlug } from 'utils'
+import { connectStore, makeDebugger } from '@utils'
+
 import Header from './Header'
 import UserInfo from './UserInfo'
 import ReactionNumbers from './ReactionNumbers'
 
 import { Wrapper, Divider } from './styles'
-
-import * as logic from './logic'
+import { useInit } from './logic'
 
 /* eslint-disable-next-line */
 const debug = makeDebugger('C:ArticleAuthorCard')
 
-class ArticleAuthorCardContainer extends React.Component {
-  componentDidMount() {
-    const { articleAuthorCard, user } = this.props
-    logic.init(articleAuthorCard, user)
-  }
+const ArticleAuthorCardContainer = ({
+  articleAuthorCard,
+  introTitle,
+  user,
+}) => {
+  useInit(articleAuthorCard, user)
 
-  componentWillUnmount() {
-    logic.uninit()
-  }
+  const { userData, isSelfViewing } = articleAuthorCard
 
-  render() {
-    const { introTitle, user } = this.props
-    const { articleAuthorCard } = this.props
-    const { userData, isSelfViewing } = articleAuthorCard
-
-    return (
-      <Wrapper>
-        <Header
-          title={introTitle}
-          user={userData}
-          isSelfViewing={isSelfViewing}
-        />
-        <Divider />
-        <UserInfo user={user} />
-        <ReactionNumbers user={user} />
-      </Wrapper>
-    )
-  }
+  return (
+    <Wrapper>
+      <Header
+        title={introTitle}
+        user={userData}
+        isSelfViewing={isSelfViewing}
+      />
+      <Divider />
+      <UserInfo user={user} />
+      <ReactionNumbers user={user} />
+    </Wrapper>
+  )
 }
 
 ArticleAuthorCardContainer.propTypes = {
@@ -73,6 +65,4 @@ ArticleAuthorCardContainer.defaultProps = {
   introTitle: '关于作者',
 }
 
-export default inject(storePlug('articleAuthorCard'))(
-  observer(ArticleAuthorCardContainer)
-)
+export default connectStore(ArticleAuthorCardContainer)

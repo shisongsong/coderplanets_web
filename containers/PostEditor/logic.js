@@ -1,4 +1,5 @@
 import R from 'ramda'
+import { useEffect } from 'react'
 
 import {
   asyncRes,
@@ -18,9 +19,9 @@ import {
   parseDomain,
   errRescue,
   BStore,
-} from 'utils'
+} from '@utils'
 
-import SR71 from 'utils/async/sr71'
+import SR71 from '@utils/async/sr71'
 import { S, updatablePostFields } from './schema'
 // import testMentions from './test_mentions'
 
@@ -129,14 +130,10 @@ export const onMentionSearch = name => {
 export const onMention = user => store.addReferUser(user)
 
 const openAttachment = att => {
-  if (store.activeThread === THREAD.RADAR) {
-    store.updateEditing({ copyRight: 'reprint' })
-  }
-
   if (!att) return false
   // const { type } = att
   // if (type === TYPE.PREVIEW_POST_EDIT) loadPost(att.id)
-
+  /* debug('openAttachment att: ', att) */
   store.updateEditing(att)
   store.markState({ isEdit: true })
 }
@@ -149,11 +146,11 @@ const doneCleanUp = () => {
 
 export const inputOnChange = (part, e) => updateEditing(store, part, e)
 export const bodyInputOnChange = content => {
-  store.markState({ extractMentions: extractMentions(content) })
-
   // draft.js will mis trigger onChange event with empty string.
   // currently this is a bug: in edit can't update to empty.
+  if (!store) return false
   if (store.isEdit && content === '') return false
+  store.markState({ extractMentions: extractMentions(content) })
 
   updateEditing(store, 'body', content)
 }
@@ -240,32 +237,27 @@ const initDraftTimmer = () => {
   )
 }
 
-export const init = (_store, attachment) => {
-  // if (store) return openAttachment(attachment)
-  store = _store
+// ###############################
+// init & uninit
+// ###############################
+export const useInit = (_store, attachment) => {
+  useEffect(
+    () => {
+      // debug('effect init')
+      store = _store
+      sub$ = sr71$.data().subscribe($solver(DataSolver, ErrSolver))
+      openAttachment(attachment)
+      initDraftTimmer()
 
-  if (sub$) return false
-  sub$ = sr71$.data().subscribe($solver(DataSolver, ErrSolver))
-  openAttachment(attachment)
-  initDraftTimmer()
-}
+      return () => {
+        // debug('effect uninit')
+        if (saveDraftTimmer) clearInterval(saveDraftTimmer)
 
-export const uninit = () => {
-  if (store.publishing || !sub$) return false
-  debug('===== do uninit')
-  // TODO: hint about save draft
-  if (saveDraftTimmer) clearInterval(saveDraftTimmer)
-
-  store.markState({ editPost: {}, isEdit: false })
-  sr71$.stop()
-  sub$.unsubscribe()
-  sub$ = null
-
-  /*
-     store.toast('info', {
-     title: 'todo',
-     msg: '草稿已保存',
-     })
-   */
-  // cancleMutate()
+        store.markState({ editPost: {}, isEdit: false })
+        sr71$.stop()
+        sub$.unsubscribe()
+      }
+    },
+    [_store, attachment]
+  )
 }

@@ -1,4 +1,5 @@
 import R from 'ramda'
+import { useEffect } from 'react'
 
 import {
   asyncRes,
@@ -19,9 +20,9 @@ import {
   nilOrEmpty,
   errRescue,
   BStore,
-} from 'utils'
+} from '@utils'
 
-import SR71 from 'utils/async/sr71'
+import SR71 from '@utils/async/sr71'
 import { S, updatableJobFields } from './schema'
 // import testMentions from './test_mentions'
 
@@ -230,30 +231,26 @@ const initDraftTimmer = () => {
   saveDraftTimmer = setInterval(() => saveDraftIfNeed(store.editJob.body), 3000)
 }
 
-export const init = (_store, attachment) => {
-  // if (store) return openAttachment(attachment)
-  store = _store
+// ###############################
+// init & uninit
+// ###############################
+export const useInit = (_store, attachment) => {
+  useEffect(
+    () => {
+      store = _store
+      // debug('effect init')
+      sub$ = sr71$.data().subscribe($solver(DataSolver, ErrSolver))
+      openAttachment(attachment)
+      initDraftTimmer()
 
-  if (sub$) return false
-  sub$ = sr71$.data().subscribe($solver(DataSolver, ErrSolver))
-  openAttachment(attachment)
-  initDraftTimmer()
-}
-
-export const uninit = () => {
-  if (store.publishing || !sub$) return false
-  debug('===== do uninit')
-  if (saveDraftTimmer) clearInterval(saveDraftTimmer)
-
-  store.markState({ editJob: {} })
-  sr71$.stop()
-  sub$.unsubscribe()
-  sub$ = null
-  /*
-     store.toast('info', {
-     title: 'todo',
-     msg: '草稿已保存',
-     })
-   */
-  // cancleMutate()
+      return () => {
+        // debug('effect uninit')
+        if (saveDraftTimmer) clearInterval(saveDraftTimmer)
+        store.markState({ editJob: {} })
+        sr71$.stop()
+        sub$.unsubscribe()
+      }
+    },
+    [_store, attachment]
+  )
 }

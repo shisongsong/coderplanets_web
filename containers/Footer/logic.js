@@ -1,4 +1,5 @@
 // import R from 'ramda'
+import { useEffect } from 'react'
 
 import {
   makeDebugger,
@@ -6,8 +7,8 @@ import {
   dispatchEvent,
   EVENT,
   PAYMENT_USAGE,
-} from 'utils'
-import SR71 from 'utils/async/sr71'
+} from '@utils'
+import SR71 from '@utils/async/sr71'
 
 // import S from './schema'
 
@@ -42,9 +43,20 @@ export const queryDoraemon = data =>
 const DataSolver = []
 const ErrSolver = []
 
-export const init = _store => {
-  store = _store
+// ###############################
+// init & uninit
+// ###############################
+export const useInit = _store => {
+  useEffect(
+    () => {
+      store = _store
+      // debug('effect init')
+      sub$ = sr71$.data().subscribe($solver(DataSolver, ErrSolver))
 
-  if (sub$) return false
-  sub$ = sr71$.data().subscribe($solver(DataSolver, ErrSolver))
+      return () => {
+        sub$.unsubscribe()
+      }
+    },
+    [_store]
+  )
 }

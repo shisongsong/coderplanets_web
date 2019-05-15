@@ -1,4 +1,5 @@
 // import R from 'ramda'
+import { useEffect } from 'react'
 
 import {
   makeDebugger,
@@ -12,9 +13,9 @@ import {
   subPath2Thread,
   thread2Subpath,
   errRescue,
-} from 'utils'
+} from '@utils'
 
-import SR71 from 'utils/async/sr71'
+import SR71 from '@utils/async/sr71'
 import S from './schema'
 
 const sr71$ = new SR71({ resv_event: [EVENT.COMMUNITY_CHANGE] })
@@ -142,19 +143,22 @@ const ErrSolver = [
   },
 ]
 
-export const init = _store => {
-  store = _store
-  debug('===== do init')
+// ###############################
+// init & uninit
+// ###############################
+export const useInit = _store => {
+  useEffect(
+    () => {
+      store = _store
+      // debug('effect init')
+      sub$ = sr71$.data().subscribe($solver(DataSolver, ErrSolver))
 
-  if (sub$) return false
-  sub$ = sr71$.data().subscribe($solver(DataSolver, ErrSolver))
-}
-
-export const uninit = () => {
-  /* debug('===== before uninit store.curView: ', store.loading) */
-  if (store.loading || !sub$) return false
-  debug('===== do uninit')
-  sr71$.stop()
-  sub$.unsubscribe()
-  sub$ = null
+      return () => {
+        // debug('effect uninit')
+        sr71$.stop()
+        sub$.unsubscribe()
+      }
+    },
+    [_store]
+  )
 }

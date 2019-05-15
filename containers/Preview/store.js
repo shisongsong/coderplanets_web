@@ -14,9 +14,9 @@ import {
   THREAD,
   Global,
   cs,
-} from 'utils'
+} from '@utils'
 
-import { User, EmptyAchievement } from 'stores/SharedModel'
+import { User, EmptyAchievement } from '@model'
 
 const PREVIEWABLE_THREADS = [THREAD.POST, THREAD.JOB, THREAD.VIDEO, THREAD.REPO]
 /* const debug = makeDebugger('S:PreviewStore') */
@@ -51,6 +51,8 @@ const Attachment = t.model('Attachment', {
   body: t.maybeNull(t.string),
   digest: t.maybeNull(t.string),
   author: t.maybeNull(User),
+  copyRight: t.optional(t.string, 'original'),
+  linkAddr: t.maybeNull(t.string),
 
   // video spec
   poster: t.maybeNull(t.string),

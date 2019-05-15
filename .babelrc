@@ -1,5 +1,6 @@
 {
   "plugins": [
+    "add-react-displayname",
     ["@babel/plugin-proposal-decorators", { "legacy": true }],
     "transform-inline-environment-variables",
     [
@@ -26,30 +27,42 @@
     ["module-resolver", {
       "root": ["./"],
       "alias": {
-        "containers":"./containers",
-        "components":"./components",
-        "config":"./config",
-        "stores":"./stores",
-        "schemas":"./containers/schemas",
-        "utils":"./utils",
-        "Img": "./components/Img",
-        "SvgIcons": "./components/SvgIcons"
+        "@containers":"./containers",
+        "@components":"./components",
+        "@config":"./config",
+        "@stores":"./stores",
+        "@model":"./stores/SharedModel",
+        "@utils":"./utils",
+        "@schemas":"./containers/schemas",
+        "@Img": "./components/Img",
+        "@SvgIcons": "./components/SvgIcons"
+      }
+    }]
+  ],
+  "presets": [
+    ["next/babel", {
+      "preset-env": {
+        "targets": {
+          "ie": "11"
+        }
       }
     }]
   ],
   "env": {
      "development": {
-       "presets": ["next/babel"],
        "plugins": ["inline-dotenv"]
     },
-    "local": {
-       "presets": ["next/babel"],
-    },
+    "local": {},
     "production": {
-      "presets": ["next/babel"]
+      "presets": [["next/babel", {
+      "preset-env": {
+        "targets": {
+          "ie": "11"
+        }
+      }
+    }]]
     },
     "test": {
-      "presets": [["next/babel", { "preset-env": { "modules": "commonjs" } }]],
       "plugins": ["inline-dotenv"]
     }
   }

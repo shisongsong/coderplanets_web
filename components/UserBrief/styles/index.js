@@ -1,7 +1,7 @@
 import styled from 'styled-components'
 
-import { theme, cs } from 'utils'
-import Img from 'Img'
+import { theme, cs } from '@utils'
+import Img from '@Img'
 
 export const Wrapper = styled.div`
   ${cs.flex()};
@@ -18,7 +18,7 @@ export const Avatar = styled(Img)`
     displayStyle === 'default' ? '120px' : '80px'};
   margin-top: 6px;
   margin-bottom: 8px;
-  cursor: ${({ hover }) => (hover ? 'pointer' : 'none')};
+  cursor: ${({ hover }) => (hover ? 'pointer' : 'default')};
 `
 export const BriefTextWrapper = styled.div`
   ${cs.flexColumn()};

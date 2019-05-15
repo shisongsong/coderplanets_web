@@ -8,13 +8,14 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import R from 'ramda'
 
-import { ICON_CMD } from 'config'
-import { makeDebugger, THREAD } from 'utils'
+import { ICON_CMD } from '@config'
+import { makeDebugger, THREAD } from '@utils'
 
-import Informer from 'containers/Informer'
+import Informer from '@containers/Informer'
 import PinOption from './PinOption'
 import RefineOption from './RefineOption'
 import EditOption from './EditOption'
+import CommunitySetterOption from './CommunitySetterOption'
 import DeleteOption from './DeleteOption'
 
 import { Wrapper, Option, OptionIcon, OptionTitle } from './styles'
@@ -33,6 +34,7 @@ const ArticleActionsPanel = ({
   onEdit,
   onInform,
   onDelete,
+  onCommunitySet,
 }) => (
   <Wrapper>
     <PinOption
@@ -52,9 +54,14 @@ const ArticleActionsPanel = ({
 
     <EditOption
       passport="owner"
-      ownerId={data.author.id}
+      ownerId={data.author && data.author.id}
       onEdit={onEdit}
       thread={thread}
+    />
+
+    <CommunitySetterOption
+      passport={`${thread}.community.set`}
+      onCommunitySet={onCommunitySet}
     />
 
     <Informer>
@@ -66,7 +73,7 @@ const ArticleActionsPanel = ({
 
     <DeleteOption
       passport="owner"
-      ownerId={data.author.id}
+      ownerId={data.author && data.author.id}
       onDelete={onDelete}
     />
   </Wrapper>
@@ -97,6 +104,7 @@ ArticleActionsPanel.propTypes = {
   onUndoPin: PropTypes.func,
   onSetRefined: PropTypes.func,
   onUnsetRefined: PropTypes.func,
+  onCommunitySet: PropTypes.func,
 }
 
 ArticleActionsPanel.defaultProps = {
@@ -108,6 +116,7 @@ ArticleActionsPanel.defaultProps = {
   onUndoPin: debug,
   onSetRefined: debug,
   onUnsetRefined: debug,
+  onCommunitySet: PropTypes.func,
 }
 
 export default React.memo(ArticleActionsPanel)

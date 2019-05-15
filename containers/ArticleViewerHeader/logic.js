@@ -1,4 +1,5 @@
 import R from 'ramda'
+import { useEffect } from 'react'
 
 import {
   makeDebugger,
@@ -11,9 +12,9 @@ import {
   EVENT,
   THREAD,
   errRescue,
-} from 'utils'
+} from '@utils'
 
-import SR71 from 'utils/async/sr71'
+import SR71 from '@utils/async/sr71'
 import S from './schema'
 
 /* eslint-disable-next-line */
@@ -151,17 +152,22 @@ const ErrSolver = [
   },
 ]
 
-export const init = _store => {
-  store = _store
+// ###############################
+// init & uninit
+// ###############################
+export const useInit = _store => {
+  useEffect(
+    () => {
+      store = _store
+      // debug('effect init')
+      sub$ = sr71$.data().subscribe($solver(DataSolver, ErrSolver))
 
-  if (sub$) return false
-  sub$ = sr71$.data().subscribe($solver(DataSolver, ErrSolver))
-}
-
-export const uninit = () => {
-  if (!sub$ || store.loading) return false
-  debug('===== do uninit')
-  sr71$.stop()
-  sub$.unsubscribe()
-  sub$ = null
+      return () => {
+        // debug('effect uninit')
+        sr71$.stop()
+        sub$.unsubscribe()
+      }
+    },
+    [_store]
+  )
 }

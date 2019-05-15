@@ -5,21 +5,19 @@
  */
 
 import React from 'react'
-import { inject, observer } from 'mobx-react'
 
-import { makeDebugger, storePlug, ROUTE } from 'utils'
+import { connectStore, makeDebugger, ROUTE } from '@utils'
 
-import PostsThread from 'containers//PostsThread'
-import VideosThread from 'containers/VideosThread'
-import ReposThread from 'containers/ReposThread'
-import WikiThread from 'containers/WikiThread'
-import JobsThread from 'containers/JobsThread'
-import UsersThread from 'containers/UsersThread'
-import CheatsheetThread from 'containers/CheatsheetThread'
+import PostsThread from '@containers//PostsThread'
+import VideosThread from '@containers/VideosThread'
+import ReposThread from '@containers/ReposThread'
+import WikiThread from '@containers/WikiThread'
+import JobsThread from '@containers/JobsThread'
+import UsersThread from '@containers/UsersThread'
+import CheatsheetThread from '@containers/CheatsheetThread'
 
 import { Wrapper } from './styles'
-
-import * as logic from './logic'
+import { useInit } from './logic'
 
 /* eslint-disable-next-line */
 const debug = makeDebugger('C:CommunityContent')
@@ -50,28 +48,16 @@ const ComunityContent = ({ curRoute }) => {
   }
 }
 
-class CommunityContentContainer extends React.Component {
-  componentDidMount() {
-    const { communityContent } = this.props
-    logic.init(communityContent)
-  }
+const CommunityContentContainer = ({ communityContent }) => {
+  useInit(communityContent)
 
-  componentWillUnmount() {
-    logic.uninit()
-  }
+  const { curRoute } = communityContent
 
-  render() {
-    const { communityContent } = this.props
-    const { curRoute } = communityContent
-
-    return (
-      <Wrapper>
-        <ComunityContent curRoute={curRoute} />
-      </Wrapper>
-    )
-  }
+  return (
+    <Wrapper testid="community-content">
+      <ComunityContent curRoute={curRoute} />
+    </Wrapper>
+  )
 }
 
-export default inject(storePlug('communityContent'))(
-  observer(CommunityContentContainer)
-)
+export default connectStore(CommunityContentContainer)

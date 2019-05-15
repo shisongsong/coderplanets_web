@@ -5,55 +5,40 @@
  */
 
 import React from 'react'
-import { inject, observer } from 'mobx-react'
 
-import { makeDebugger, storePlug } from 'utils'
-import { Container } from './styles'
+import { connectStore, makeDebugger } from '@utils'
 
 import Header from './Header'
 import MenuList from './MenuList'
 
-import * as logic from './logic'
+import { Wrapper } from './styles'
+import { useInit, onSortMenuEnd } from './logic'
 
 /* eslint-disable-next-line */
 const debug = makeDebugger('C:Sidebar:index')
 
-class SidebarContainer extends React.Component {
-  componentDidMount() {
-    const { sidebar } = this.props
-    logic.init(sidebar)
+const SidebarContainer = ({ sidebar }) => {
+  useInit(sidebar)
 
-    setTimeout(() => {
-      /* eslint-disable-next-line */
-      logic.toggleForeceRerender(true)
-    }, 1000)
-  }
+  const { curCommunity, pin, communitiesData, forceRerender } = sidebar
 
-  componentWillUnmount() {
-    logic.uninit()
-  }
+  // onMouseLeave={logic.leaveSidebar}
+  // onMouseLeave is not unreliable in chrome: https://github.com/facebook/react/issues/4492
+  const activeRaw = curCommunity.raw
 
-  render() {
-    const { sidebar } = this.props
-    const { curCommunity, pin, communitiesData, forceRerender } = sidebar
-    //    onMouseLeave={logic.leaveSidebar}
-    // onMouseLeave is not unreliable in chrome: https://github.com/facebook/react/issues/4492
-    const activeRaw = curCommunity.raw
-
-    return (
-      <Container pin={pin}>
-        <Header pin={pin} />
-        <MenuList
-          items={communitiesData}
-          pin={pin}
-          forceRerender={forceRerender}
-          activeRaw={activeRaw}
-          onSortEnd={logic.onSortMenuEnd}
-          distance={5}
-        />
-      </Container>
-    )
-  }
+  return (
+    <Wrapper pin={pin} testid="sidebar">
+      <Header pin={pin} />
+      <MenuList
+        items={communitiesData}
+        pin={pin}
+        forceRerender={forceRerender}
+        activeRaw={activeRaw}
+        onSortEnd={onSortMenuEnd}
+        distance={5}
+      />
+    </Wrapper>
+  )
 }
 
-export default inject(storePlug('sidebar'))(observer(SidebarContainer))
+export default connectStore(SidebarContainer)

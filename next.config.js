@@ -1,21 +1,19 @@
 /* eslint-disable */
 const webpack = require('webpack')
+const nextSourceMaps = require('@zeit/next-source-maps')()
 
 require('dotenv').config()
+
 const path = require('path')
 const fs = require('fs')
 const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer')
 const Dotenv = require('dotenv-webpack')
-
 /* eslint-enable */
 
 const { ANALYZE } = process.env
 
-module.exports = {
-  // https://github.com/zeit/next.js/blob/canary/examples/with-static-export/next.config.js
-  // exportPathMap: () => {},
-
-  webpack: (config, { isServer }) => {
+module.exports = nextSourceMaps({
+  webpack: (config, { isServer, buildId }) => {
     config.plugins = config.plugins || []
 
     config.plugins.push(new webpack.IgnorePlugin(/(?:\/tests|__mocks)/))
@@ -24,22 +22,15 @@ module.exports = {
       new webpack.ContextReplacementPlugin(/moment[/\\]locale$/, /(en)/)
     )
 
-    // see https://github.com/RubyLouvre/anu/issues/640
-    /*
-       config.resolve.alias = {
-       react: 'anujs',
-       'react-dom': 'anujs',
-       'prop-types': 'anujs/lib/ReactPropTypes',
-       'create-react-class': 'anujs/lib/createClass',
-       }
-     */
-
-    // .babelrc
-    /*
-       "react-dom/server": "./node_modules/anujs/dist/React/server",
-       "react": "./node_modules/anujs",
-       "prop-types": "./node_modules/anujs/lib/ReactPropTypes"
-     */
+    // for sentry
+    config.plugins.push(
+      new webpack.DefinePlugin({
+        'process.env.SENTRY_RELEASE': JSON.stringify(buildId),
+      })
+    )
+    if (!isServer) {
+      config.resolve.alias['@sentry/node'] = '@sentry/browser'
+    }
 
     if (ANALYZE) {
       config.plugins.push(
@@ -77,4 +68,21 @@ module.exports = {
 
     return config
   },
-}
+})
+
+// see https://github.com/RubyLouvre/anu/issues/640
+/*
+   config.resolve.alias = {
+   react: 'anujs',
+   'react-dom': 'anujs',
+   'prop-types': 'anujs/lib/ReactPropTypes',
+   'create-react-class': 'anujs/lib/createClass',
+   }
+ */
+
+// .babelrc
+/*
+   "react-dom/server": "./node_modules/anujs/dist/React/server",
+   "react": "./node_modules/anujs",
+   "prop-types": "./node_modules/anujs/lib/ReactPropTypes"
+ */

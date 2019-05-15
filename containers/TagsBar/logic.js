@@ -1,4 +1,5 @@
 import R from 'ramda'
+import { useEffect } from 'react'
 
 import {
   makeDebugger,
@@ -10,9 +11,9 @@ import {
   THREAD,
   TOPIC,
   errRescue,
-} from 'utils'
+} from '@utils'
 
-import SR71 from 'utils/async/sr71'
+import SR71 from '@utils/async/sr71'
 import S from './schema'
 
 const sr71$ = new SR71({
@@ -24,7 +25,11 @@ let store = null
 /* eslint-disable-next-line */
 const debug = makeDebugger('L:TagsBar')
 
-export const onTagSelect = tag => store.selectTag(tag)
+/* eslint-disable no-unused-vars */
+export const onTagSelect = R.curry((tag, cb, e) => {
+  store.selectTag(tag)
+  cb(tag)
+})
 
 const NO_TAG_THREADS = [THREAD.USER, THREAD.CHEATSHEET, THREAD.WIKI]
 
@@ -91,22 +96,26 @@ const ErrSolver = [
   },
 ]
 
-export const init = (_store, thread, topic, active) => {
-  store = _store
+// ###############################
+// init & uninit
+// ###############################
 
-  if (sub$) return false
-  sub$ = sr71$.data().subscribe($solver(DataSolver, ErrSolver))
-  // if (R.isEmpty(store.tagsData)) loadTags()
+export const useInit = (_store, thread, topic, active) => {
+  useEffect(
+    () => {
+      store = _store
+      debug('effect init')
+      sub$ = sr71$.data().subscribe($solver(DataSolver, ErrSolver))
+      let activeTag = R.pick(['id', 'title', 'color'], active)
+      if (R.isEmpty(activeTag.title)) activeTag = null
+      store.markState({ thread, topic, activeTag })
 
-  let activeTag = R.pick(['id', 'title', 'color'], active)
-  if (R.isEmpty(activeTag.title)) activeTag = null
-  store.markState({ thread, topic, activeTag })
-}
-
-export const uninit = () => {
-  if (!sub$ || store.loading) return false
-  debug('===== do uninit')
-  sub$.unsubscribe()
-  sr71$.stop()
-  sub$ = null
+      return () => {
+        debug('effect uninit')
+        sub$.unsubscribe()
+        sr71$.stop()
+      }
+    },
+    [_store, thread, topic, active]
+  )
 }

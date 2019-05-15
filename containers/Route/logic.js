@@ -1,4 +1,5 @@
-import { makeDebugger, getMainPath, getSubPath, Global } from 'utils'
+import { useEffect } from 'react'
+import { makeDebugger, getMainPath, getSubPath, Global } from '@utils'
 
 /* eslint-disable-next-line */
 const debug = makeDebugger('L:Route')
@@ -11,18 +12,25 @@ const browserHistoryBtnClicked = popstate => {
   Global.location = popstate.state.as
 }
 
-export const init = (_store, routeObj) => {
-  if (store) return false
+// ###############################
+// init & uninit
+// ###############################
 
-  store = _store
-  // sync init router info
-  const mainPath = getMainPath(routeObj)
-  const subPath = getSubPath(routeObj)
-  const { query } = routeObj
+export const useInit = (_store, routeObj) => {
+  useEffect(
+    () => {
+      store = _store
+      // sync init router info
+      const mainPath = getMainPath(routeObj)
+      const subPath = getSubPath(routeObj)
+      const { query } = routeObj
 
-  store.markState({ mainPath, subPath, query })
+      store.markState({ mainPath, subPath, query })
 
-  Global.onpopstate = browserHistoryBtnClicked
+      Global.onpopstate = browserHistoryBtnClicked
+    },
+    [_store, routeObj]
+  )
 }
 
-export const uninit = () => {}
+export const holder = 1

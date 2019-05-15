@@ -1,6 +1,7 @@
 import R from 'ramda'
+import { useEffect } from 'react'
 
-import { PAGE_SIZE } from 'config'
+import { PAGE_SIZE } from '@config'
 import {
   makeDebugger,
   dispatchEvent,
@@ -10,9 +11,9 @@ import {
   ERR,
   EVENT,
   errRescue,
-} from 'utils'
+} from '@utils'
 
-import SR71 from 'utils/async/sr71'
+import SR71 from '@utils/async/sr71'
 import S from './schema'
 
 const sr71$ = new SR71({
@@ -60,9 +61,9 @@ export const switchToUpdater = editCategory => {
   store.changeViewTo('updater')
 }
 
-export const changeViewTo = view => {
-  store.changeViewTo(view)
-}
+/* eslint-disable-next-line */
+export const changeViewTo = R.curry((view, e) => store.changeViewTo(view))
+
 export const onSetterCreateCat = () => {
   store.markState({ createfromSetter: true })
   store.changeViewTo('creator')
@@ -213,20 +214,23 @@ const initStates = displayMode => {
   return loadCategories()
 }
 
-export const init = (_store, displayMode) => {
-  store = _store
+// ###############################
+// init & uninit
+// ###############################
+export const useInit = (_store, displayMode) => {
+  useEffect(
+    () => {
+      store = _store
+      // debug('effect init')
+      sub$ = sr71$.data().subscribe($solver(DataSolver, ErrSolver))
+      initStates(displayMode)
 
-  debug(store)
-  if (sub$) return initStates(displayMode)
-  sub$ = sr71$.data().subscribe($solver(DataSolver, ErrSolver))
-
-  initStates(displayMode)
-}
-
-export const uninit = () => {
-  if (store.loading || !sub$) return false
-  debug('===== do uninit')
-  sr71$.stop()
-  sub$.unsubscribe()
-  sub$ = null
+      return () => {
+        // debug('effect uninit')
+        sr71$.stop()
+        sub$.unsubscribe()
+      }
+    },
+    [_store, displayMode]
+  )
 }

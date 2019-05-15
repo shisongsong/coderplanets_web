@@ -5,15 +5,15 @@
  */
 
 import React from 'react'
-import { inject, observer } from 'mobx-react'
 import { Affix } from 'antd'
 
-import Maybe from 'components/Maybe'
-import PagedContents from 'components/PagedContents'
-import ContentFilter from 'components/ContentFilter'
-import PublishLabel from 'components/PublishLabel'
-import { ICON_CMD } from 'config'
-import { makeDebugger, storePlug, THREAD } from 'utils'
+import { ICON_CMD } from '@config'
+import { connectStore, makeDebugger, THREAD } from '@utils'
+
+import Maybe from '@components/Maybe'
+import PagedContents from '@components/PagedContents'
+import ContentFilter from '@components/ContentFilter'
+import PublishLabel from '@components/PublishLabel'
 import TagsBar from '../TagsBar'
 
 import {
@@ -26,88 +26,83 @@ import {
   PublishBtn,
 } from './styles'
 
-import * as logic from './logic'
+import {
+  useInit,
+  onFilterSelect,
+  onC11NChange,
+  onPreview,
+  onContentCreate,
+  onTagSelect,
+  loadVideos,
+} from './logic'
 
 /* eslint-disable-next-line */
 const debug = makeDebugger('C:VideosThread')
 
-class VideosThreadContainer extends React.Component {
-  componentDidMount() {
-    const { videosThread } = this.props
-    logic.init(videosThread)
-  }
+const VideosThreadContainer = ({ videosThread }) => {
+  useInit(videosThread)
 
-  componentWillUnmount() {
-    logic.uninit()
-  }
+  const {
+    pagedVideosData,
+    filtersData,
+    curRoute,
+    curView,
+    activeVideo,
+    activeTagData,
+    accountInfo,
+    showFilterBar,
+  } = videosThread
 
-  render() {
-    const { videosThread } = this.props
+  const { mainPath } = curRoute
+  const { totalCount } = pagedVideosData
 
-    const {
-      pagedVideosData,
-      filtersData,
-      curRoute,
-      curView,
-      activeVideo,
-      activeTagData,
-      accountInfo,
-      showFilterBar,
-    } = videosThread
+  return (
+    <Wrapper>
+      <LeftPadding />
+      <LeftPart>
+        <Maybe test={showFilterBar}>
+          <FilterWrapper>
+            <ContentFilter
+              thread={THREAD.VIDEO}
+              onSelect={onFilterSelect}
+              activeFilter={filtersData}
+              accountInfo={accountInfo}
+              totalCount={totalCount}
+              onC11NChange={onC11NChange}
+            />
+          </FilterWrapper>
+        </Maybe>
 
-    const { mainPath } = curRoute
-    const { totalCount } = pagedVideosData
+        <PagedContents
+          data={pagedVideosData}
+          community={mainPath}
+          thread={THREAD.VIDEO}
+          curView={curView}
+          active={activeVideo}
+          accountInfo={accountInfo}
+          onPreview={onPreview}
+          onPageChange={loadVideos}
+        />
+      </LeftPart>
 
-    return (
-      <Wrapper>
-        <LeftPadding />
-        <LeftPart>
-          <Maybe test={showFilterBar}>
-            <FilterWrapper>
-              <ContentFilter
-                thread={THREAD.VIDEO}
-                onSelect={logic.onFilterSelect}
-                activeFilter={filtersData}
-                accountInfo={accountInfo}
-                totalCount={totalCount}
-                onC11NChange={logic.onC11NChange}
-              />
-            </FilterWrapper>
-          </Maybe>
+      <RightPart>
+        <React.Fragment>
+          <PublishBtn type="primary" onClick={onContentCreate}>
+            <PublishLabel text="发布视频" iconSrc={`${ICON_CMD}/link2.svg`} />
+          </PublishBtn>
 
-          <PagedContents
-            data={pagedVideosData}
-            community={mainPath}
-            thread={THREAD.VIDEO}
-            curView={curView}
-            active={activeVideo}
-            accountInfo={accountInfo}
-            onPreview={logic.onPreview}
-            onPageChange={logic.loadVideos}
-          />
-        </LeftPart>
-
-        <RightPart>
-          <React.Fragment>
-            <PublishBtn type="primary" onClick={logic.onContentCreate}>
-              <PublishLabel text="发布视频" iconSrc={`${ICON_CMD}/link2.svg`} />
-            </PublishBtn>
-
-            <Affix offsetTop={50}>
-              <TagsBar
-                thread={THREAD.VIDEO}
-                active={activeTagData}
-                onSelect={logic.onTagSelect}
-              />
-            </Affix>
-          </React.Fragment>
-        </RightPart>
-        <RightPadding />
-      </Wrapper>
-    )
-  }
+          <Affix offsetTop={50}>
+            <TagsBar
+              thread={THREAD.VIDEO}
+              active={activeTagData}
+              onSelect={onTagSelect}
+            />
+          </Affix>
+        </React.Fragment>
+      </RightPart>
+      <RightPadding />
+    </Wrapper>
+  )
 }
 
-export default inject(storePlug('videosThread'))(
-  observer(VideosThreadContainer)
-)
+export default connectStore(VideosThreadContainer)

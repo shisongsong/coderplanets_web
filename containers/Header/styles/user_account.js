@@ -1,7 +1,7 @@
 import styled from 'styled-components'
 
-import Img from 'components/Img'
-import { theme, cs } from 'utils'
+import Img from '@components/Img'
+import { theme, cs } from '@utils'
 
 export const Wrapper = styled.div`
   margin-right: 20px;
@@ -64,7 +64,7 @@ export const MenuDivider = styled.div`
   margin-top: 3px;
   margin-bottom: 3px;
   border-bottom: 2px solid;
-  border-bottom-color: ${theme('thread.articleDivider')};
+  border-bottom-color: ${theme('banner.numberDivider')};
 `
 
 export const AvatarIcon = styled.img`

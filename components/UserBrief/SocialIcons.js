@@ -2,9 +2,9 @@ import React from 'react'
 import R from 'ramda'
 import ReactTooltip from 'react-tooltip'
 
-import { ICON_CMD } from 'config'
+import { ICON_CMD } from '@config'
 
-import { nilOrEmpty, SOCIAL_LISTS } from 'utils'
+import { nilOrEmpty, SOCIAL_LISTS } from '@utils'
 import { Wrapper, Linker, SocialIcon } from './styles/social_icons'
 
 const tooltipOffset = JSON.stringify({ left: 3 })
@@ -19,7 +19,7 @@ const DisplayIcon = ({ user, social }) => {
       >
         <SocialIcon
           src={`${ICON_CMD}/${social.key}.svg`}
-          active={!nilOrEmpty(user[social.key])}
+          active={!nilOrEmpty(user.social[social.key])}
         />
       </Linker>
     )
@@ -27,13 +27,13 @@ const DisplayIcon = ({ user, social }) => {
   return (
     <div
       key={social.key}
-      data-tip={user[social.key]}
+      data-tip={user.social[social.key]}
       data-for="social_icons"
       data-offset={tooltipOffset}
     >
       <SocialIcon
         src={`${ICON_CMD}/${social.key}.svg`}
-        active={!nilOrEmpty(user[social.key])}
+        active={!nilOrEmpty(user.social[social.key])}
       />
     </div>
   )

@@ -1,6 +1,6 @@
 import styled from 'styled-components'
 
-import { theme, cs } from 'utils'
+import { theme, cs } from '@utils'
 
 export const BannerContainer = styled.div`
   ${cs.flexColumn('justify-center')};
@@ -14,11 +14,13 @@ export const BannerContainer = styled.div`
     min-height: 160px;
   }
 `
+// margin-left: -28px; is for center offset when doraemon popout
 export const ContentWrapper = styled.div`
   ${cs.flexColumn('align-center')};
   justify-content: center;
   width: 100%;
   margin-top: -30px;
+  margin-left: -28px;
 `
 export const Title = styled.div`
   color: ${theme('banner.title')};

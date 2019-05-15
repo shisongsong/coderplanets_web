@@ -1,19 +1,19 @@
 import React from 'react'
 
-import { TYPE } from 'utils'
+import { TYPE } from '@utils'
 
-import MailBox from 'containers/MailBox'
-import UserLister from 'containers/UserLister'
-import Cashier from 'containers/Cashier'
-import UpgradePackges from 'containers/UpgradePackges'
-import Navigator from 'components/Navigator'
+import MailBox from '@containers/MailBox'
+import UserLister from '@containers/UserLister'
+import Cashier from '@containers/Cashier'
+import UpgradePackges from '@containers/UpgradePackges'
+import Navigator from '@components/Navigator'
 
 import ThreadsNav from './ThreadsNav'
 import UserAccount from './UserAccount'
 import AddOns from './AddOns'
 
 import {
-  HeaderWrapper,
+  Wrapper,
   InnerWrapper,
   RouterWrapper,
   Search,
@@ -32,10 +32,11 @@ const Header = ({
   accountInfo,
   curCommunity,
 }) => (
-  <HeaderWrapper
+  <Wrapper
     id="whereCallShowDoraemon"
     leftOffset={leftOffset}
     fixed={fixed}
+    testid="header"
   >
     <InnerWrapper id={TYPE.APP_HEADER_ID}>
       <RouterWrapper>
@@ -51,8 +52,8 @@ const Header = ({
       </RouterWrapper>
       <AddOns />
       <Operations>
-        <Search onClick={openDoraemon}>
-          <HeaderSearchIcon offsettop="-1px" />
+        <Search onClick={openDoraemon} testid="header-search">
+          <HeaderSearchIcon offsettop="-1px" testid="header-search-icon" />
         </Search>
 
         {isLogin && <MailBox />}
@@ -63,7 +64,7 @@ const Header = ({
         <UserAccount isLogin={isLogin} accountInfo={accountInfo} />
       </Operations>
     </InnerWrapper>
-  </HeaderWrapper>
+  </Wrapper>
 )
 
 export default Header

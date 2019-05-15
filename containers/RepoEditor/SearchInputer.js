@@ -1,8 +1,8 @@
 import React from 'react'
 import { Button } from 'antd'
 
-import FormItem from 'components/FormItem'
-import { GITHUB_WEB_ADDR } from 'config'
+import FormItem from '@components/FormItem'
+import { GITHUB_WEB_ADDR } from '@config'
 // import { Wrapper } from './styles'
 
 import { InputWrapper } from './styles/search_man'
@@ -18,6 +18,7 @@ const SearchInputer = ({ value, searching }) => (
         onChange={searchOnChange}
         placeholder={`Github 仓库地址，如: ${GITHUB_WEB_ADDR}`}
         disabled={Boolean(searching)}
+        autoFocus
       />
     </InputWrapper>
 

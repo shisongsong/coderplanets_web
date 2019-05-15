@@ -1,5 +1,5 @@
 import R from 'ramda'
-// const debug = makeDebugger('L:sidebar')
+import { useEffect } from 'react'
 import { arrayMove } from 'react-sortable-hoc'
 
 import {
@@ -15,9 +15,9 @@ import {
   ROUTE,
   Global,
   errRescue,
-} from 'utils'
+} from '@utils'
 
-import SR71 from 'utils/async/sr71'
+import SR71 from '@utils/async/sr71'
 import S from './schema'
 
 const sr71$ = new SR71({
@@ -150,18 +150,27 @@ const ErrSolver = [
   },
 ]
 
-export const init = _store => {
-  store = _store
+// ###############################
+// init & uninit
+// ###############################
+export const useInit = _store => {
+  useEffect(
+    () => {
+      store = _store
+      // debug('effect init')
+      sub$ = sr71$.data().subscribe($solver(DataSolver, ErrSolver))
 
-  if (sub$) return false
-  sub$ = sr71$.data().subscribe($solver(DataSolver, ErrSolver))
-}
+      setTimeout(() => {
+        /* eslint-disable-next-line */
+        toggleForeceRerender(true)
+      }, 1000)
 
-export const uninit = () => {
-  if (!sub$) return false
-
-  debug('===== do uninit')
-  sr71$.stop()
-  sub$.unsubscribe()
-  sub$ = null
+      return () => {
+        // debug('effect uninit')
+        sr71$.stop()
+        sub$.unsubscribe()
+      }
+    },
+    [_store]
+  )
 }

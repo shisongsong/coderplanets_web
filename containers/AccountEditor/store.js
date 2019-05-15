@@ -12,8 +12,8 @@ import {
   stripMobx,
   changeset,
   flashState,
-} from 'utils'
-import { User, EduBackground, WorkBackground } from 'stores/SharedModel'
+} from '@utils'
+import { User, EduBackground, WorkBackground } from '@model'
 
 /* eslint-disable-next-line */
 const debug = makeDebugger('S:AccountEditorStore')
@@ -124,12 +124,11 @@ const AccountEditorStore = t
       self.markState({ editUser })
     },
 
-    addBg(type) {
+    addBackground(type) {
       if (!self.validator(type)) return false
 
       if (type === 'work') {
         let workBackgrounds = R.clone(self.editUserData.workBackgrounds)
-        /* workBackgrounds.push(self.workBgData) */
         workBackgrounds = R.concat([self.workBgData], workBackgrounds)
 
         self.updateEditing({ workBackgrounds })
@@ -137,7 +136,6 @@ const AccountEditorStore = t
       }
 
       let educationBackgrounds = R.clone(self.editUserData.educationBackgrounds)
-      /* educationBackgrounds.push(self.educationBgData) */
       educationBackgrounds = R.concat(
         [self.educationBgData],
         educationBackgrounds
